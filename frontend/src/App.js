@@ -16,6 +16,15 @@ function App() {
   const [showAddMember, setShowAddMember] = useState(false);
   const [newMemberName, setNewMemberName] = useState('');
 
+  // State for adding expenses
+  const [showAddExpense, setShowAddExpense] = useState(false);
+  const [newExpense, setNewExpense] = useState({
+    description: '',
+    amount: '',
+    paidBy: '',
+    splitAmong: []
+  });
+
   // Create a new group
   const handleCreateGroup = () => {
     if (newGroupName.trim() === '') {
@@ -52,13 +61,11 @@ function App() {
       return;
     }
 
-    // Check if member already exists
     if (selectedGroup.members.includes(newMemberName.trim())) {
       alert('This member already exists in the group!');
       return;
     }
 
-    // Update the group with new member
     const updatedGroups = groups.map(group => {
       if (group.id === selectedGroup.id) {
         return {
@@ -71,7 +78,6 @@ function App() {
 
     setGroups(updatedGroups);
     
-    // Update selectedGroup to reflect changes
     setSelectedGroup({
       ...selectedGroup,
       members: [...selectedGroup.members, newMemberName.trim()]
@@ -99,6 +105,104 @@ function App() {
       ...selectedGroup,
       members: selectedGroup.members.filter(member => member !== memberName)
     });
+  };
+
+  // Handle expense form input changes
+  const handleExpenseChange = (field, value) => {
+    setNewExpense({
+      ...newExpense,
+      [field]: value
+    });
+  };
+
+  // Toggle member selection for split
+  const toggleSplitMember = (member) => {
+    const isSelected = newExpense.splitAmong.includes(member);
+    
+    if (isSelected) {
+      // Remove member
+      setNewExpense({
+        ...newExpense,
+        splitAmong: newExpense.splitAmong.filter(m => m !== member)
+      });
+    } else {
+      // Add member
+      setNewExpense({
+        ...newExpense,
+        splitAmong: [...newExpense.splitAmong, member]
+      });
+    }
+  };
+
+  // Add expense to group
+  const handleAddExpense = () => {
+    // Validation
+    if (newExpense.description.trim() === '') {
+      alert('Please enter expense description!');
+      return;
+    }
+
+    if (newExpense.amount === '' || parseFloat(newExpense.amount) <= 0) {
+      alert('Please enter a valid amount!');
+      return;
+    }
+
+    if (newExpense.paidBy === '') {
+      alert('Please select who paid!');
+      return;
+    }
+
+    if (newExpense.splitAmong.length === 0) {
+      alert('Please select at least one person to split among!');
+      return;
+    }
+
+    // Create expense object
+    const expense = {
+      id: Date.now(),
+      description: newExpense.description.trim(),
+      amount: parseFloat(newExpense.amount),
+      paidBy: newExpense.paidBy,
+      splitAmong: [...newExpense.splitAmong],
+      date: new Date().toLocaleDateString('en-IN')
+    };
+
+    // Update groups
+    const updatedGroups = groups.map(group => {
+      if (group.id === selectedGroup.id) {
+        return {
+          ...group,
+          expenses: [...group.expenses, expense]
+        };
+      }
+      return group;
+    });
+
+    setGroups(updatedGroups);
+    
+    // Update selected group
+    setSelectedGroup({
+      ...selectedGroup,
+      expenses: [...selectedGroup.expenses, expense]
+    });
+
+    // Reset form
+    setNewExpense({
+      description: '',
+      amount: '',
+      paidBy: '',
+      splitAmong: []
+    });
+    setShowAddExpense(false);
+  };
+
+  // Open add expense modal
+  const openAddExpenseModal = () => {
+    if (selectedGroup.members.length === 0) {
+      alert('Please add members first before adding expenses!');
+      return;
+    }
+    setShowAddExpense(true);
   };
 
   // If a group is selected, show group details
@@ -130,13 +234,21 @@ function App() {
             </p>
           </div>
 
-          {/* Add Member Button */}
-          <button 
-            className="btn-primary"
-            onClick={() => setShowAddMember(true)}
-          >
-            + Add Member
-          </button>
+          {/* Action Buttons */}
+          <div className="action-buttons">
+            <button 
+              className="btn-primary"
+              onClick={() => setShowAddMember(true)}
+            >
+              + Add Member
+            </button>
+            <button 
+              className="btn-primary"
+              onClick={openAddExpenseModal}
+            >
+              + Add Expense
+            </button>
+          </div>
 
           {/* Add Member Modal */}
           {showAddMember && (
@@ -176,7 +288,91 @@ function App() {
             </div>
           )}
 
-          {/* Members List */}
+          {/* Add Expense Modal */}
+          {showAddExpense && (
+            <div className="modal" onClick={() => setShowAddExpense(false)}>
+              <div className="modal-content expense-modal" onClick={(e) => e.stopPropagation()}>
+                <h2>Add Expense</h2>
+                
+                {/* Description */}
+                <input
+                  type="text"
+                  placeholder="Description (e.g., Hotel booking, Dinner)"
+                  value={newExpense.description}
+                  onChange={(e) => handleExpenseChange('description', e.target.value)}
+                  className="input-field"
+                />
+
+                {/* Amount */}
+                <input
+                  type="number"
+                  placeholder="Amount (₹)"
+                  value={newExpense.amount}
+                  onChange={(e) => handleExpenseChange('amount', e.target.value)}
+                  className="input-field"
+                  min="0"
+                  step="0.01"
+                />
+
+                {/* Paid By */}
+                <div className="form-group">
+                  <label>Paid by:</label>
+                  <select
+                    value={newExpense.paidBy}
+                    onChange={(e) => handleExpenseChange('paidBy', e.target.value)}
+                    className="select-field"
+                  >
+                    <option value="">Select member</option>
+                    {selectedGroup.members.map((member, index) => (
+                      <option key={index} value={member}>{member}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Split Among */}
+                <div className="form-group">
+                  <label>Split among:</label>
+                  <div className="checkbox-group">
+                    {selectedGroup.members.map((member, index) => (
+                      <label key={index} className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={newExpense.splitAmong.includes(member)}
+                          onChange={() => toggleSplitMember(member)}
+                        />
+                        <span>{member}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="modal-buttons">
+                  <button 
+                    className="btn-primary"
+                    onClick={handleAddExpense}
+                  >
+                    Add Expense
+                  </button>
+                  <button 
+                    className="btn-secondary"
+                    onClick={() => {
+                      setShowAddExpense(false);
+                      setNewExpense({
+                        description: '',
+                        amount: '',
+                        paidBy: '',
+                        splitAmong: []
+                      });
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Members Section */}
           <div className="members-section">
             <h3>Members</h3>
             
@@ -208,13 +404,36 @@ function App() {
             )}
           </div>
 
-          {/* Expenses Section (Coming in Day 4) */}
+          {/* Expenses Section */}
           <div className="expenses-section">
             <h3>Expenses</h3>
-            <div className="empty-state">
-              <p>💵 No expenses yet.</p>
-              <p>Coming soon in Day 4!</p>
-            </div>
+            
+            {selectedGroup.expenses.length === 0 ? (
+              <div className="empty-state">
+                <p>💵 No expenses yet.</p>
+                <p>Add your first expense to start tracking!</p>
+              </div>
+            ) : (
+              <div className="expenses-list">
+                {selectedGroup.expenses.map((expense) => {
+                  const sharePerPerson = expense.amount / expense.splitAmong.length;
+                  return (
+                    <div key={expense.id} className="expense-card">
+                      <div className="expense-header">
+                        <h4>{expense.description}</h4>
+                        <span className="expense-amount">₹{expense.amount.toFixed(2)}</span>
+                      </div>
+                      <div className="expense-details">
+                        <p>💳 Paid by: <strong>{expense.paidBy}</strong></p>
+                        <p>📅 Date: {expense.date}</p>
+                        <p>👥 Split among: {expense.splitAmong.join(', ')}</p>
+                        <p>💰 Each person pays: <strong>₹{sharePerPerson.toFixed(2)}</strong></p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>

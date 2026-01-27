@@ -8,31 +8,32 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 
                'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-  background: #f5f7fa;
+  background: #f0fdfa;
 }
 
 .App {
   min-height: 100vh;
 }
 
-/* Header */
+/* Header - NEW TEAL GRADIENT! */
 .app-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #0e7490 100%);
   color: white;
   padding: 3rem 2rem;
   text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(6, 182, 212, 0.3);
 }
 
 .app-header h1 {
   font-size: 2.5rem;
   margin-bottom: 0.5rem;
   font-weight: 700;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .app-header p {
   font-size: 1.1rem;
-  opacity: 0.9;
+  opacity: 0.95;
 }
 
 /* Container */
@@ -44,7 +45,7 @@ body {
 
 /* Buttons */
 .btn-primary {
-  background: #667eea;
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
   color: white;
   border: none;
   padding: 1rem 2rem;
@@ -53,18 +54,18 @@ body {
   cursor: pointer;
   font-weight: 600;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
 }
 
 .btn-primary:hover {
-  background: #5568d3;
+  background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 6px 20px rgba(6, 182, 212, 0.4);
 }
 
 .btn-secondary {
-  background: #e0e7ff;
-  color: #667eea;
+  background: #ccfbf1;
+  color: #0891b2;
   border: none;
   padding: 1rem 2rem;
   font-size: 1rem;
@@ -75,7 +76,7 @@ body {
 }
 
 .btn-secondary:hover {
-  background: #c7d2fe;
+  background: #99f6e4;
 }
 
 .btn-back {
@@ -111,6 +112,19 @@ body {
   transform: scale(1.1);
 }
 
+/* Action Buttons Container */
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.action-buttons button {
+  flex: 1;
+  min-width: 200px;
+}
+
 /* Modal/Popup */
 .modal {
   position: fixed;
@@ -139,6 +153,12 @@ body {
   width: 90%;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: slideUp 0.3s ease;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.expense-modal {
+  max-width: 600px;
 }
 
 @keyframes slideUp {
@@ -154,7 +174,7 @@ body {
 
 .modal-content h2 {
   margin-bottom: 1.5rem;
-  color: #333;
+  color: #0e7490;
   font-size: 1.8rem;
 }
 
@@ -163,7 +183,7 @@ body {
   width: 100%;
   padding: 1rem;
   font-size: 1rem;
-  border: 2px solid #e0e7ff;
+  border: 2px solid #ccfbf1;
   border-radius: 10px;
   margin-bottom: 1.5rem;
   transition: all 0.3s ease;
@@ -171,8 +191,76 @@ body {
 
 .input-field:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #06b6d4;
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+}
+
+/* Select Field */
+.select-field {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+  border: 2px solid #ccfbf1;
+  border-radius: 10px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.select-field:focus {
+  outline: none;
+  border-color: #06b6d4;
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+}
+
+/* Form Group */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #0e7490;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* Checkbox Group */
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #f0fdfa;
+  border-radius: 10px;
+  border: 2px solid #ccfbf1;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.checkbox-label:hover {
+  background: #ccfbf1;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #06b6d4;
+}
+
+.checkbox-label span {
+  color: #0e7490;
+  font-weight: 500;
 }
 
 /* Modal Buttons */
@@ -192,7 +280,7 @@ body {
 
 .groups-list h2 {
   margin-bottom: 1.5rem;
-  color: #333;
+  color: #0e7490;
   font-size: 1.8rem;
 }
 
@@ -202,7 +290,7 @@ body {
   padding: 4rem 2rem;
   background: white;
   border-radius: 20px;
-  border: 2px dashed #e0e7ff;
+  border: 2px dashed #99f6e4;
   color: #999;
 }
 
@@ -213,6 +301,7 @@ body {
 
 .empty-state p:last-child {
   font-size: 1.1rem;
+  color: #64748b;
 }
 
 /* Groups Grid */
@@ -227,7 +316,7 @@ body {
   background: white;
   padding: 2rem;
   border-radius: 15px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 15px rgba(6, 182, 212, 0.1);
   transition: all 0.3s ease;
   cursor: pointer;
   border: 2px solid transparent;
@@ -235,38 +324,39 @@ body {
 
 .group-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
-  border-color: #667eea;
+  box-shadow: 0 8px 25px rgba(6, 182, 212, 0.2);
+  border-color: #06b6d4;
 }
 
 .group-card h3 {
-  color: #333;
+  color: #0e7490;
   font-size: 1.4rem;
   margin-bottom: 0.8rem;
 }
 
 .group-info {
-  color: #666;
+  color: #64748b;
   font-size: 0.95rem;
 }
 
 /* Group Details */
 .group-details-header {
-  background: white;
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  color: white;
   padding: 2rem;
   border-radius: 15px;
   margin-bottom: 2rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2);
 }
 
 .group-details-header h2 {
-  color: #333;
+  color: white;
   font-size: 2rem;
   margin-bottom: 0.5rem;
 }
 
 .group-stats {
-  color: #666;
+  color: rgba(255, 255, 255, 0.9);
   font-size: 1rem;
 }
 
@@ -276,11 +366,12 @@ body {
   padding: 2rem;
   border-radius: 15px;
   margin-top: 2rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 15px rgba(6, 182, 212, 0.1);
+  border: 2px solid #e0f2fe;
 }
 
 .members-section h3 {
-  color: #333;
+  color: #0e7490;
   font-size: 1.5rem;
   margin-bottom: 1.5rem;
 }
@@ -295,15 +386,16 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.5rem;
-  background: #f9fafb;
+  background: #f0fdfa;
   border-radius: 12px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid #99f6e4;
   transition: all 0.3s ease;
 }
 
 .member-card:hover {
-  border-color: #667eea;
-  background: #f3f4f6;
+  border-color: #06b6d4;
+  background: #ccfbf1;
+  transform: translateX(5px);
 }
 
 .member-info {
@@ -315,7 +407,7 @@ body {
 .member-avatar {
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
   color: white;
   display: flex;
   align-items: center;
@@ -323,12 +415,13 @@ body {
   border-radius: 50%;
   font-weight: 700;
   font-size: 1.1rem;
+  box-shadow: 0 2px 8px rgba(6, 182, 212, 0.3);
 }
 
 .member-name {
   font-size: 1.1rem;
-  color: #333;
-  font-weight: 500;
+  color: #0e7490;
+  font-weight: 600;
 }
 
 /* Expenses Section */
@@ -337,13 +430,76 @@ body {
   padding: 2rem;
   border-radius: 15px;
   margin-top: 2rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 15px rgba(6, 182, 212, 0.1);
+  border: 2px solid #e0f2fe;
 }
 
 .expenses-section h3 {
-  color: #333;
+  color: #0e7490;
   font-size: 1.5rem;
   margin-bottom: 1.5rem;
+}
+
+.expenses-list {
+  display: grid;
+  gap: 1.5rem;
+}
+
+/* Expense Card */
+.expense-card {
+  background: #f0fdfa;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 2px solid #99f6e4;
+  transition: all 0.3s ease;
+}
+
+.expense-card:hover {
+  border-color: #06b6d4;
+  box-shadow: 0 4px 15px rgba(6, 182, 212, 0.15);
+  transform: translateY(-2px);
+}
+
+.expense-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #ccfbf1;
+}
+
+.expense-header h4 {
+  color: #0e7490;
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+.expense-amount {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #f97316;
+  background: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.2);
+}
+
+.expense-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.expense-details p {
+  color: #475569;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.expense-details strong {
+  color: #0e7490;
+  font-weight: 600;
 }
 
 /* Responsive Design */
@@ -360,7 +516,21 @@ body {
     flex-direction: column;
   }
   
+  .action-buttons {
+    flex-direction: column;
+  }
+  
+  .action-buttons button {
+    width: 100%;
+  }
+  
   .member-card {
     padding: 1rem;
+  }
+  
+  .expense-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
   }
 }
