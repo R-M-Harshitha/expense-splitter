@@ -15,7 +15,7 @@ body {
   min-height: 100vh;
 }
 
-/* Header - NEW TEAL GRADIENT! */
+/* Header */
 .app-header {
   background: linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #0e7490 100%);
   color: white;
@@ -38,7 +38,7 @@ body {
 
 /* Container */
 .container {
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 2rem auto;
   padding: 0 1.5rem;
 }
@@ -61,6 +61,25 @@ body {
   background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(6, 182, 212, 0.4);
+}
+
+.btn-settlement {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3);
+}
+
+.btn-settlement:hover {
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
 }
 
 .btn-secondary {
@@ -502,6 +521,423 @@ body {
   font-weight: 600;
 }
 
+/* ============================================ */
+/* SETTLEMENT PAGE STYLES - THE MAGIC! */
+/* ============================================ */
+
+/* Settlement Header */
+.settlement-header {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: white;
+  padding: 3rem 2rem;
+  border-radius: 20px;
+  text-align: center;
+  margin-bottom: 2rem;
+  box-shadow: 0 8px 30px rgba(249, 115, 22, 0.3);
+}
+
+.settlement-header h2 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.settlement-subtitle {
+  font-size: 1.2rem;
+  opacity: 0.95;
+}
+
+/* Summary Cards */
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.summary-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  box-shadow: 0 4px 15px rgba(6, 182, 212, 0.1);
+  border: 2px solid #e0f2fe;
+  transition: all 0.3s ease;
+}
+
+.summary-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(6, 182, 212, 0.2);
+  border-color: #06b6d4;
+}
+
+.summary-card.highlight {
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  border-color: #06b6d4;
+}
+
+.summary-card.highlight .summary-label,
+.summary-card.highlight .summary-value {
+  color: white;
+}
+
+.summary-icon {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.summary-content {
+  flex: 1;
+}
+
+.summary-label {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+}
+
+.summary-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0e7490;
+}
+
+/* Balances Section */
+.balances-section {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 20px;
+  margin-bottom: 3rem;
+  box-shadow: 0 4px 15px rgba(6, 182, 212, 0.1);
+  border: 2px solid #e0f2fe;
+}
+
+.balances-section h3 {
+  color: #0e7490;
+  font-size: 1.8rem;
+  margin-bottom: 2rem;
+}
+
+.balances-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.balance-card {
+  padding: 1.5rem;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.balance-card.positive {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border: 2px solid #6ee7b7;
+}
+
+.balance-card.negative {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border: 2px solid #fca5a5;
+}
+
+.balance-card.settled {
+  background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+  border: 2px solid #99f6e4;
+}
+
+.balance-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.balance-person {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.balance-avatar {
+  width: 45px;
+  height: 45px;
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 1.2rem;
+  box-shadow: 0 2px 8px rgba(6, 182, 212, 0.3);
+}
+
+.balance-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0e7490;
+}
+
+.balance-amount {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.balance-label {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-bottom: 0.3rem;
+}
+
+.balance-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.balance-value.positive {
+  color: #059669;
+}
+
+.balance-value.negative {
+  color: #dc2626;
+}
+
+.balance-value.settled {
+  color: #06b6d4;
+  font-size: 1.3rem;
+}
+
+/* Transactions Section */
+.transactions-section {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 20px;
+  margin-bottom: 3rem;
+  box-shadow: 0 4px 15px rgba(6, 182, 212, 0.1);
+  border: 2px solid #e0f2fe;
+}
+
+.transactions-section h3 {
+  color: #0e7490;
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+.transactions-subtitle {
+  color: #64748b;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+.transactions-list {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.transaction-card {
+  background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+  padding: 2rem;
+  border-radius: 15px;
+  border: 2px solid #99f6e4;
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.transaction-card:hover {
+  transform: translateX(5px);
+  box-shadow: 0 6px 20px rgba(6, 182, 212, 0.15);
+  border-color: #06b6d4;
+}
+
+.transaction-number {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(6, 182, 212, 0.3);
+}
+
+.transaction-flow {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.transaction-person {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.person-avatar {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.3rem;
+  box-shadow: 0 2px 8px rgba(8, 145, 178, 0.3);
+}
+
+.person-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0e7490;
+}
+
+.transaction-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.arrow-line {
+  font-size: 2rem;
+  color: #06b6d4;
+  font-weight: 700;
+}
+
+.transaction-amount {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 1.2rem;
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
+  white-space: nowrap;
+}
+/* Delete Expense Button */
+.expense-header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.btn-delete-expense {
+  background: transparent;
+  border: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  opacity: 0.6;
+}
+
+.btn-delete-expense:hover {
+  background: #fee2e2;
+  transform: scale(1.2);
+  opacity: 1;
+}
+
+/* Delete Group Button */
+.btn-delete-group {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  opacity: 0;
+  margin-left: 1rem;
+}
+
+.group-card:hover .btn-delete-group {
+  opacity: 0.7;
+}
+
+.btn-delete-group:hover {
+  background: #fee2e2;
+  transform: scale(1.2);
+  opacity: 1 !important;
+}
+
+/* Group Card with Delete Button */
+.group-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(6, 182, 212, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Smooth Transitions */
+.expense-card,
+.member-card,
+.group-card {
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Algorithm Explanation */
+.algorithm-explanation {
+  background: linear-gradient(135deg, #f0fdfa 0%, #e0f2fe 100%);
+  padding: 2rem;
+  border-radius: 15px;
+  border: 2px solid #99f6e4;
+}
+
+.algorithm-explanation h4 {
+  color: #0e7490;
+  font-size: 1.4rem;
+  margin-bottom: 1.5rem;
+}
+
+.algorithm-explanation ol {
+  padding-left: 1.5rem;
+}
+
+.algorithm-explanation li {
+  color: #475569;
+  font-size: 1rem;
+  line-height: 1.8;
+  margin-bottom: 1rem;
+}
+
+.algorithm-explanation strong {
+  color: #0e7490;
+  font-weight: 600;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .app-header h1 {
@@ -532,5 +968,21 @@ body {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
+  }
+
+  .summary-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .balances-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .transaction-flow {
+    flex-direction: column;
+  }
+
+  .settlement-header h2 {
+    font-size: 1.8rem;
   }
 }
