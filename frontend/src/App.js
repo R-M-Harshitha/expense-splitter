@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 
 function App() {
-  // State for groups
-  const [groups, setGroups] = useState([]);
+  // Load groups from localStorage on startup
+  const [groups, setGroups] = useState(() => {
+    const savedGroups = localStorage.getItem('smartSplitGroups');
+    return savedGroups ? JSON.parse(savedGroups) : [];
+  });
   
   // State for modals
   const [showCreateGroup, setShowCreateGroup] = useState(false);
@@ -27,6 +30,35 @@ function App() {
 
   // State for showing settlement
   const [showSettlement, setShowSettlement] = useState(false);
+
+  // State for tracking paid transactions
+  const [paidTransactions, setPaidTransactions] = useState(() => {
+    const saved = localStorage.getItem('smartSplitPaidTransactions');
+    return saved ? JSON.parse(saved) : {};
+  });
+
+  // State for showing algorithm explanation
+  const [showAlgorithmExplanation, setShowAlgorithmExplanation] = useState(false);
+
+  // Save groups to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('smartSplitGroups', JSON.stringify(groups));
+  }, [groups]);
+
+  // Save paid transactions to localStorage
+  useEffect(() => {
+    localStorage.setItem('smartSplitPaidTransactions', JSON.stringify(paidTransactions));
+  }, [paidTransactions]);
+
+  // Update selectedGroup when groups change
+  useEffect(() => {
+    if (selectedGroup) {
+      const updatedGroup = groups.find(g => g.id === selectedGroup.id);
+      if (updatedGroup) {
+        setSelectedGroup(updatedGroup);
+      }
+    }
+  }, [groups]);
 
   // Create a new group
   const handleCreateGroup = () => {
@@ -81,18 +113,16 @@ function App() {
     });
 
     setGroups(updatedGroups);
-    
-    setSelectedGroup({
-      ...selectedGroup,
-      members: [...selectedGroup.members, newMemberName.trim()]
-    });
-
     setNewMemberName('');
     setShowAddMember(false);
   };
 
   // Remove member from group
   const handleRemoveMember = (memberName) => {
+    if (!window.confirm(`Remove ${memberName} from this group?`)) {
+      return;
+    }
+
     const updatedGroups = groups.map(group => {
       if (group.id === selectedGroup.id) {
         return {
@@ -104,11 +134,6 @@ function App() {
     });
 
     setGroups(updatedGroups);
-    
-    setSelectedGroup({
-      ...selectedGroup,
-      members: selectedGroup.members.filter(member => member !== memberName)
-    });
   };
 
   // Handle expense form input changes
@@ -178,11 +203,6 @@ function App() {
     });
 
     setGroups(updatedGroups);
-    
-    setSelectedGroup({
-      ...selectedGroup,
-      expenses: [...selectedGroup.expenses, expense]
-    });
 
     setNewExpense({
       description: '',
@@ -192,9 +212,9 @@ function App() {
     });
     setShowAddExpense(false);
   };
+
   // Delete expense from group
   const handleDeleteExpense = (expenseId) => {
-    // Ask for confirmation
     if (!window.confirm('Are you sure you want to delete this expense?')) {
       return;
     }
@@ -210,18 +230,11 @@ function App() {
     });
 
     setGroups(updatedGroups);
-    
-    setSelectedGroup({
-      ...selectedGroup,
-      expenses: selectedGroup.expenses.filter(expense => expense.id !== expenseId)
-    });
-
     alert('Expense deleted successfully!');
   };
 
   // Delete entire group
   const handleDeleteGroup = (groupId) => {
-    // Ask for confirmation
     if (!window.confirm('Are you sure you want to delete this group? All expenses and members will be lost!')) {
       return;
     }
@@ -229,7 +242,6 @@ function App() {
     const updatedGroups = groups.filter(group => group.id !== groupId);
     setGroups(updatedGroups);
     
-    // If we're viewing this group, go back to list
     if (selectedGroup && selectedGroup.id === groupId) {
       setSelectedGroup(null);
     }
@@ -246,28 +258,39 @@ function App() {
     setShowAddExpense(true);
   };
 
+  // Mark transaction as paid
+  const markAsPaid = (from, to, amount) => {
+    const key = `${selectedGroup.id}-${from}-${to}-${amount.toFixed(2)}`;
+    setPaidTransactions({
+      ...paidTransactions,
+      [key]: !paidTransactions[key]
+    });
+  };
+
+  // Check if transaction is paid
+  const isTransactionPaid = (from, to, amount) => {
+    const key = `${selectedGroup.id}-${from}-${to}-${amount.toFixed(2)}`;
+    return paidTransactions[key] || false;
+  };
+
   // ============================================
   // SETTLEMENT ALGORITHM - THE CORE FEATURE!
   // ============================================
   
   const calculateBalances = () => {
-    // Initialize balances for all members
     const balances = {};
     selectedGroup.members.forEach(member => {
       balances[member] = 0;
     });
 
-    // Calculate net balance for each person
     selectedGroup.expenses.forEach(expense => {
       const payer = expense.paidBy;
       const totalAmount = expense.amount;
       const splitAmong = expense.splitAmong;
       const sharePerPerson = totalAmount / splitAmong.length;
 
-      // Payer gets credited (they paid the full amount)
       balances[payer] += totalAmount;
 
-      // Each person who shared the expense gets debited
       splitAmong.forEach(person => {
         balances[person] -= sharePerPerson;
       });
@@ -279,23 +302,20 @@ function App() {
   const minimizeTransactions = () => {
     const balances = calculateBalances();
     
-    // Separate into creditors (should receive) and debtors (should pay)
     const creditors = [];
     const debtors = [];
 
     Object.entries(balances).forEach(([person, balance]) => {
-      if (balance > 0.01) { // Small threshold for floating point
+      if (balance > 0.01) {
         creditors.push({ person, amount: balance });
       } else if (balance < -0.01) {
         debtors.push({ person, amount: Math.abs(balance) });
       }
     });
 
-    // Sort both arrays by amount (descending) - Greedy approach
     creditors.sort((a, b) => b.amount - a.amount);
     debtors.sort((a, b) => b.amount - a.amount);
 
-    // Generate minimum transactions
     const transactions = [];
     let i = 0, j = 0;
 
@@ -303,7 +323,6 @@ function App() {
       const creditor = creditors[i];
       const debtor = debtors[j];
 
-      // Settle the minimum of what debtor owes and creditor is owed
       const settleAmount = Math.min(creditor.amount, debtor.amount);
 
       transactions.push({
@@ -312,11 +331,9 @@ function App() {
         amount: settleAmount
       });
 
-      // Update remaining amounts
       creditor.amount -= settleAmount;
       debtor.amount -= settleAmount;
 
-      // Move to next if fully settled
       if (creditor.amount < 0.01) i++;
       if (debtor.amount < 0.01) j++;
     }
@@ -324,12 +341,10 @@ function App() {
     return transactions;
   };
 
-  // Calculate total expenses
   const getTotalExpenses = () => {
     return selectedGroup.expenses.reduce((sum, expense) => sum + expense.amount, 0);
   };
 
-  // Calculate fair share per person
   const getFairShare = () => {
     const total = getTotalExpenses();
     return selectedGroup.members.length > 0 ? total / selectedGroup.members.length : 0;
@@ -341,11 +356,12 @@ function App() {
     const transactions = minimizeTransactions();
     const totalExpenses = getTotalExpenses();
     const fairShare = getFairShare();
+    const paidCount = transactions.filter(t => isTransactionPaid(t.from, t.to, t.amount)).length;
 
     return (
       <div className="App">
         <header className="app-header">
-          <h1>💰 Expense Splitter</h1>
+          <h1>💰 SmartSplit</h1>
           <p>Split expenses smartly with friends</p>
         </header>
 
@@ -357,13 +373,11 @@ function App() {
             ← Back to Group Details
           </button>
 
-          {/* Settlement Header */}
           <div className="settlement-header">
             <h2>💸 Settlement Summary</h2>
             <p className="settlement-subtitle">{selectedGroup.name}</p>
           </div>
 
-          {/* Summary Cards */}
           <div className="summary-cards">
             <div className="summary-card">
               <div className="summary-icon">💵</div>
@@ -398,7 +412,6 @@ function App() {
             </div>
           </div>
 
-          {/* Individual Balances */}
           <div className="balances-section">
             <h3>📊 Individual Balances</h3>
             <div className="balances-grid">
@@ -436,65 +449,87 @@ function App() {
             </div>
           </div>
 
-          {/* Settlement Transactions */}
           <div className="transactions-section">
             <h3>🔄 Settlement Transactions</h3>
             <p className="transactions-subtitle">
               {transactions.length === 0 
                 ? "Everyone is settled up! No transactions needed." 
-                : `Only ${transactions.length} transaction${transactions.length > 1 ? 's' : ''} needed to settle all debts!`}
+                : `${paidCount} of ${transactions.length} transaction${transactions.length > 1 ? 's' : ''} completed`}
             </p>
             
             {transactions.length > 0 && (
               <div className="transactions-list">
-                {transactions.map((transaction, index) => (
-                  <div key={index} className="transaction-card">
-                    <div className="transaction-number">{index + 1}</div>
-                    <div className="transaction-flow">
-                      <div className="transaction-person from">
-                        <span className="person-avatar">
-                          {transaction.from.charAt(0).toUpperCase()}
-                        </span>
-                        <span className="person-name">{transaction.from}</span>
+                {transactions.map((transaction, index) => {
+                  const isPaid = isTransactionPaid(transaction.from, transaction.to, transaction.amount);
+                  
+                  return (
+                    <div 
+                      key={index} 
+                      className={`transaction-card ${isPaid ? 'paid' : ''}`}
+                    >
+                      <div className="transaction-number">{index + 1}</div>
+                      <div className="transaction-flow">
+                        <div className="transaction-person from">
+                          <span className="person-avatar">
+                            {transaction.from.charAt(0).toUpperCase()}
+                          </span>
+                          <span className="person-name">{transaction.from}</span>
+                        </div>
+                        <div className="transaction-arrow">
+                          <span className="arrow-line">→</span>
+                          <span className="transaction-amount">₹{transaction.amount.toFixed(2)}</span>
+                        </div>
+                        <div className="transaction-person to">
+                          <span className="person-avatar">
+                            {transaction.to.charAt(0).toUpperCase()}
+                          </span>
+                          <span className="person-name">{transaction.to}</span>
+                        </div>
                       </div>
-                      <div className="transaction-arrow">
-                        <span className="arrow-line">→</span>
-                        <span className="transaction-amount">₹{transaction.amount.toFixed(2)}</span>
-                      </div>
-                      <div className="transaction-person to">
-                        <span className="person-avatar">
-                          {transaction.to.charAt(0).toUpperCase()}
-                        </span>
-                        <span className="person-name">{transaction.to}</span>
-                      </div>
+                      <label className="paid-checkbox">
+                        <input
+                          type="checkbox"
+                          checked={isPaid}
+                          onChange={() => markAsPaid(transaction.from, transaction.to, transaction.amount)}
+                        />
+                        <span>{isPaid ? '✅ Paid' : '☐ Mark as Paid'}</span>
+                      </label>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
 
-          {/* Algorithm Explanation */}
           <div className="algorithm-explanation">
-            <h4>🧮 How the Algorithm Works</h4>
-            <ol>
-              <li>
-                <strong>Calculate Net Balance:</strong> For each person, we calculate 
-                (Total amount they paid) - (Their fair share of all expenses)
-              </li>
-              <li>
-                <strong>Separate Creditors & Debtors:</strong> People with positive balance 
-                should receive money, people with negative balance should pay
-              </li>
-              <li>
-                <strong>Greedy Matching:</strong> Match the person who owes the most with 
-                the person who should receive the most, settle the smaller amount
-              </li>
-              <li>
-                <strong>Result:</strong> Minimum number of transactions (often reduces from 
-                O(n²) to O(n) transactions!)
-              </li>
-            </ol>
+            <div 
+              className="algorithm-header"
+              onClick={() => setShowAlgorithmExplanation(!showAlgorithmExplanation)}
+            >
+              <h4>🧮 How the Algorithm Works</h4>
+              <span className="toggle-icon">{showAlgorithmExplanation ? '▼' : '▶'}</span>
+            </div>
+            
+            {showAlgorithmExplanation && (
+              <ol className="algorithm-steps">
+                <li>
+                  <strong>Calculate Net Balance:</strong> For each person, we calculate 
+                  (Total amount they paid) - (Their fair share of all expenses)
+                </li>
+                <li>
+                  <strong>Separate Creditors & Debtors:</strong> People with positive balance 
+                  should receive money, people with negative balance should pay
+                </li>
+                <li>
+                  <strong>Greedy Matching:</strong> Match the person who owes the most with 
+                  the person who should receive the most, settle the smaller amount
+                </li>
+                <li>
+                  <strong>Result:</strong> Minimum number of transactions! This reduces from 
+                  potentially O(n²) to O(n) transactions using a greedy algorithm approach.
+                </li>
+              </ol>
+            )}
           </div>
         </div>
       </div>
@@ -506,7 +541,7 @@ function App() {
     return (
       <div className="App">
         <header className="app-header">
-          <h1>💰 Expense Splitter</h1>
+          <h1>💰 SmartSplit</h1>
           <p>Split expenses smartly with friends</p>
         </header>
 
@@ -705,34 +740,34 @@ function App() {
                 <p>Add your first expense to start tracking!</p>
               </div>
             ) : (
-             <div className="expenses-list">
-  {selectedGroup.expenses.map((expense) => {
-    const sharePerPerson = expense.amount / expense.splitAmong.length;
-    return (
-      <div key={expense.id} className="expense-card">
-        <div className="expense-header">
-          <h4>{expense.description}</h4>
-          <div className="expense-header-right">
-            <span className="expense-amount">₹{expense.amount.toFixed(2)}</span>
-            <button 
-              className="btn-delete-expense"
-              onClick={() => handleDeleteExpense(expense.id)}
-              title="Delete expense"
-            >
-              🗑️
-            </button>
-          </div>
-        </div>
-        <div className="expense-details">
-          <p>💳 Paid by: <strong>{expense.paidBy}</strong></p>
-          <p>📅 Date: {expense.date}</p>
-          <p>👥 Split among: {expense.splitAmong.join(', ')}</p>
-          <p>💰 Each person pays: <strong>₹{sharePerPerson.toFixed(2)}</strong></p>
-        </div>
-      </div>
-    );
-  })}
-</div>
+              <div className="expenses-list">
+                {selectedGroup.expenses.map((expense) => {
+                  const sharePerPerson = expense.amount / expense.splitAmong.length;
+                  return (
+                    <div key={expense.id} className="expense-card">
+                      <div className="expense-header">
+                        <h4>{expense.description}</h4>
+                        <div className="expense-header-right">
+                          <span className="expense-amount">₹{expense.amount.toFixed(2)}</span>
+                          <button 
+                            className="btn-delete-expense"
+                            onClick={() => handleDeleteExpense(expense.id)}
+                            title="Delete expense"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </div>
+                      <div className="expense-details">
+                        <p>💳 Paid by: <strong>{expense.paidBy}</strong></p>
+                        <p>📅 Date: {expense.date}</p>
+                        <p>👥 Split among: {expense.splitAmong.join(', ')}</p>
+                        <p>💰 Each person pays: <strong>₹{sharePerPerson.toFixed(2)}</strong></p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             )}
           </div>
         </div>
@@ -744,7 +779,7 @@ function App() {
   return (
     <div className="App">
       <header className="app-header">
-        <h1>💰 Expense Splitter</h1>
+        <h1>💰 SmartSplit</h1>
         <p>Split expenses smartly with friends</p>
       </header>
 
@@ -803,31 +838,31 @@ function App() {
             </div>
           ) : (
             <div className="groups-grid">
-  {groups.map(group => (
-    <div 
-      key={group.id} 
-      className="group-card"
-    >
-      <div onClick={() => openGroupDetails(group)} style={{ flex: 1 }}>
-        <h3>{group.name}</h3>
-        <p className="group-info">
-          👥 {group.members.length} members · 
-          💵 {group.expenses.length} expenses
-        </p>
-      </div>
-      <button 
-        className="btn-delete-group"
-        onClick={(e) => {
-          e.stopPropagation(); // Prevent opening group
-          handleDeleteGroup(group.id);
-        }}
-        title="Delete group"
-      >
-        🗑️
-      </button>
-    </div>
-  ))}
-</div>
+              {groups.map(group => (
+                <div 
+                  key={group.id} 
+                  className="group-card"
+                >
+                  <div onClick={() => openGroupDetails(group)} style={{ flex: 1 }}>
+                    <h3>{group.name}</h3>
+                    <p className="group-info">
+                      👥 {group.members.length} members · 
+                      💵 {group.expenses.length} expenses
+                    </p>
+                  </div>
+                  <button 
+                    className="btn-delete-group"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteGroup(group.id);
+                    }}
+                    title="Delete group"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>

@@ -937,7 +937,138 @@ body {
   color: #0e7490;
   font-weight: 600;
 }
+/* Paid Transaction Styles */
+.transaction-card.paid {
+  opacity: 0.7;
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border-color: #6ee7b7;
+}
 
+.transaction-card.paid .transaction-amount {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  text-decoration: line-through;
+}
+
+.paid-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.75rem 1rem;
+  background: white;
+  border-radius: 10px;
+  margin-left: 1rem;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.paid-checkbox:hover {
+  background: #f0fdfa;
+  border-color: #06b6d4;
+}
+
+.paid-checkbox input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  accent-color: #10b981;
+}
+
+.paid-checkbox span {
+  font-weight: 600;
+  color: #0e7490;
+  font-size: 0.95rem;
+}
+
+.transaction-card.paid .paid-checkbox span {
+  color: #059669;
+}
+
+/* Algorithm Explanation Toggle */
+.algorithm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 1rem;
+  background: white;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+}
+
+.algorithm-header:hover {
+  background: #f0fdfa;
+}
+
+.toggle-icon {
+  font-size: 1.2rem;
+  color: #06b6d4;
+  font-weight: 700;
+}
+
+.algorithm-steps {
+  padding-left: 1.5rem;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Delete Expense Button */
+.expense-header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.btn-delete-expense {
+  background: transparent;
+  border: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  opacity: 0.6;
+}
+
+.btn-delete-expense:hover {
+  background: #fee2e2;
+  transform: scale(1.2);
+  opacity: 1;
+}
+
+/* Delete Group Button */
+.btn-delete-group {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  opacity: 0;
+  margin-left: 1rem;
+}
+
+.group-card:hover .btn-delete-group {
+  opacity: 0.7;
+}
+
+.btn-delete-group:hover {
+  background: #fee2e2;
+  transform: scale(1.2);
+  opacity: 1 !important;
+}
 /* Responsive Design */
 @media (max-width: 768px) {
   .app-header h1 {
