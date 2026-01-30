@@ -1,2 +1,2 @@
-# expense-splitter
+# SmartSplit
 Smart expense splitter with optimal settlement algorithm
