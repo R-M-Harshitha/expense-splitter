@@ -106,7 +106,7 @@ function App() {
       setGroups([...groups, { id: docRef.id, ...newGroup }]);
       setNewGroupName('');
       setShowCreateGroup(false);
-      alert('Group created successfully!');
+      // Group created successfully
     } catch (error) {
       console.error("Error creating group:", error);
       alert("Error creating group. Please try again.");
@@ -147,7 +147,7 @@ function App() {
       await loadGroups();
       setNewMemberName('');
       setShowAddMember(false);
-      alert('Member added successfully!');
+      // Member added
     } catch (error) {
       console.error("Error adding member:", error);
       alert("Error adding member. Please try again.");
@@ -169,7 +169,7 @@ function App() {
       });
 
       await loadGroups();
-      alert('Member removed successfully!');
+      // Member removed
     } catch (error) {
       console.error("Error removing member:", error);
       alert("Error removing member. Please try again.");
@@ -249,7 +249,7 @@ function App() {
         splitAmong: []
       });
       setShowAddExpense(false);
-      alert('Expense added successfully!');
+      // Expense added
     } catch (error) {
       console.error("Error adding expense:", error);
       alert("Error adding expense. Please try again.");
@@ -271,7 +271,7 @@ function App() {
       });
 
       await loadGroups();
-      alert('Expense deleted successfully!');
+      // Expense deleted
     } catch (error) {
       console.error("Error deleting expense:", error);
       alert("Error deleting expense. Please try again.");
@@ -292,7 +292,7 @@ function App() {
       }
 
       await loadGroups();
-      alert('Group deleted successfully!');
+      // group deleted
     } catch (error) {
       console.error("Error deleting group:", error);
       alert("Error deleting group. Please try again.");
