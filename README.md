@@ -1,3 +1,5 @@
+<<<<<<< HEAD
+
 # SmartSplit 💰
 
 A web app I built to solve a real problem - splitting expenses with friends without the headache of figuring out who owes whom!

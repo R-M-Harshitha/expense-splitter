@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
+import { db } from './firebase';
+import { 
+  collection, 
+  addDoc, 
+  getDocs, 
+  updateDoc, 
+  deleteDoc, 
+  doc 
+} from 'firebase/firestore';
 
 function App() {
-  // Load groups from localStorage on startup
-  const [groups, setGroups] = useState(() => {
-    const savedGroups = localStorage.getItem('smartSplitGroups');
-    return savedGroups ? JSON.parse(savedGroups) : [];
-  });
+  // State for groups
+  const [groups, setGroups] = useState([]);
+  const [loading, setLoading] = useState(true);
   
   // State for modals
   const [showCreateGroup, setShowCreateGroup] = useState(false);
@@ -31,7 +38,7 @@ function App() {
   // State for showing settlement
   const [showSettlement, setShowSettlement] = useState(false);
 
-  // State for tracking paid transactions
+  // State for tracking paid transactions (still using localStorage for simplicity)
   const [paidTransactions, setPaidTransactions] = useState(() => {
     const saved = localStorage.getItem('smartSplitPaidTransactions');
     return saved ? JSON.parse(saved) : {};
@@ -40,15 +47,15 @@ function App() {
   // State for showing algorithm explanation
   const [showAlgorithmExplanation, setShowAlgorithmExplanation] = useState(false);
 
-  // Save groups to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem('smartSplitGroups', JSON.stringify(groups));
-  }, [groups]);
-
   // Save paid transactions to localStorage
   useEffect(() => {
     localStorage.setItem('smartSplitPaidTransactions', JSON.stringify(paidTransactions));
   }, [paidTransactions]);
+
+  // Load groups from Firebase on startup
+  useEffect(() => {
+    loadGroups();
+  }, []);
 
   // Update selectedGroup when groups change
   useEffect(() => {
@@ -60,23 +67,50 @@ function App() {
     }
   }, [groups]);
 
+  // Load all groups from Firebase
+  const loadGroups = async () => {
+    try {
+      setLoading(true);
+      const groupsCollection = collection(db, 'groups');
+      const groupsSnapshot = await getDocs(groupsCollection);
+      const groupsList = groupsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setGroups(groupsList);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error loading groups:", error);
+      alert("Error loading groups. Please refresh the page.");
+      setLoading(false);
+    }
+  };
+
   // Create a new group
-  const handleCreateGroup = () => {
+  const handleCreateGroup = async () => {
     if (newGroupName.trim() === '') {
       alert('Please enter a group name!');
       return;
     }
 
-    const newGroup = {
-      id: Date.now(),
-      name: newGroupName,
-      members: [],
-      expenses: []
-    };
+    try {
+      const newGroup = {
+        name: newGroupName,
+        members: [],
+        expenses: [],
+        createdAt: new Date().toISOString()
+      };
 
-    setGroups([...groups, newGroup]);
-    setNewGroupName('');
-    setShowCreateGroup(false);
+      const docRef = await addDoc(collection(db, 'groups'), newGroup);
+      
+      setGroups([...groups, { id: docRef.id, ...newGroup }]);
+      setNewGroupName('');
+      setShowCreateGroup(false);
+      alert('Group created successfully!');
+    } catch (error) {
+      console.error("Error creating group:", error);
+      alert("Error creating group. Please try again.");
+    }
   };
 
   // Open group details
@@ -91,7 +125,7 @@ function App() {
   };
 
   // Add member to selected group
-  const handleAddMember = () => {
+  const handleAddMember = async () => {
     if (newMemberName.trim() === '') {
       alert('Please enter a member name!');
       return;
@@ -102,38 +136,44 @@ function App() {
       return;
     }
 
-    const updatedGroups = groups.map(group => {
-      if (group.id === selectedGroup.id) {
-        return {
-          ...group,
-          members: [...group.members, newMemberName.trim()]
-        };
-      }
-      return group;
-    });
+    try {
+      const updatedMembers = [...selectedGroup.members, newMemberName.trim()];
+      const groupRef = doc(db, 'groups', selectedGroup.id);
+      
+      await updateDoc(groupRef, {
+        members: updatedMembers
+      });
 
-    setGroups(updatedGroups);
-    setNewMemberName('');
-    setShowAddMember(false);
+      await loadGroups();
+      setNewMemberName('');
+      setShowAddMember(false);
+      alert('Member added successfully!');
+    } catch (error) {
+      console.error("Error adding member:", error);
+      alert("Error adding member. Please try again.");
+    }
   };
 
   // Remove member from group
-  const handleRemoveMember = (memberName) => {
+  const handleRemoveMember = async (memberName) => {
     if (!window.confirm(`Remove ${memberName} from this group?`)) {
       return;
     }
 
-    const updatedGroups = groups.map(group => {
-      if (group.id === selectedGroup.id) {
-        return {
-          ...group,
-          members: group.members.filter(member => member !== memberName)
-        };
-      }
-      return group;
-    });
+    try {
+      const updatedMembers = selectedGroup.members.filter(member => member !== memberName);
+      const groupRef = doc(db, 'groups', selectedGroup.id);
+      
+      await updateDoc(groupRef, {
+        members: updatedMembers
+      });
 
-    setGroups(updatedGroups);
+      await loadGroups();
+      alert('Member removed successfully!');
+    } catch (error) {
+      console.error("Error removing member:", error);
+      alert("Error removing member. Please try again.");
+    }
   };
 
   // Handle expense form input changes
@@ -162,7 +202,7 @@ function App() {
   };
 
   // Add expense to group
-  const handleAddExpense = () => {
+  const handleAddExpense = async () => {
     if (newExpense.description.trim() === '') {
       alert('Please enter expense description!');
       return;
@@ -183,70 +223,80 @@ function App() {
       return;
     }
 
-    const expense = {
-      id: Date.now(),
-      description: newExpense.description.trim(),
-      amount: parseFloat(newExpense.amount),
-      paidBy: newExpense.paidBy,
-      splitAmong: [...newExpense.splitAmong],
-      date: new Date().toLocaleDateString('en-IN')
-    };
+    try {
+      const expense = {
+        id: Date.now().toString(),
+        description: newExpense.description.trim(),
+        amount: parseFloat(newExpense.amount),
+        paidBy: newExpense.paidBy,
+        splitAmong: [...newExpense.splitAmong],
+        date: new Date().toLocaleDateString('en-IN')
+      };
 
-    const updatedGroups = groups.map(group => {
-      if (group.id === selectedGroup.id) {
-        return {
-          ...group,
-          expenses: [...group.expenses, expense]
-        };
-      }
-      return group;
-    });
+      const updatedExpenses = [...selectedGroup.expenses, expense];
+      const groupRef = doc(db, 'groups', selectedGroup.id);
+      
+      await updateDoc(groupRef, {
+        expenses: updatedExpenses
+      });
 
-    setGroups(updatedGroups);
+      await loadGroups();
 
-    setNewExpense({
-      description: '',
-      amount: '',
-      paidBy: '',
-      splitAmong: []
-    });
-    setShowAddExpense(false);
+      setNewExpense({
+        description: '',
+        amount: '',
+        paidBy: '',
+        splitAmong: []
+      });
+      setShowAddExpense(false);
+      alert('Expense added successfully!');
+    } catch (error) {
+      console.error("Error adding expense:", error);
+      alert("Error adding expense. Please try again.");
+    }
   };
 
   // Delete expense from group
-  const handleDeleteExpense = (expenseId) => {
+  const handleDeleteExpense = async (expenseId) => {
     if (!window.confirm('Are you sure you want to delete this expense?')) {
       return;
     }
 
-    const updatedGroups = groups.map(group => {
-      if (group.id === selectedGroup.id) {
-        return {
-          ...group,
-          expenses: group.expenses.filter(expense => expense.id !== expenseId)
-        };
-      }
-      return group;
-    });
+    try {
+      const updatedExpenses = selectedGroup.expenses.filter(expense => expense.id !== expenseId);
+      const groupRef = doc(db, 'groups', selectedGroup.id);
+      
+      await updateDoc(groupRef, {
+        expenses: updatedExpenses
+      });
 
-    setGroups(updatedGroups);
-    alert('Expense deleted successfully!');
+      await loadGroups();
+      alert('Expense deleted successfully!');
+    } catch (error) {
+      console.error("Error deleting expense:", error);
+      alert("Error deleting expense. Please try again.");
+    }
   };
 
   // Delete entire group
-  const handleDeleteGroup = (groupId) => {
+  const handleDeleteGroup = async (groupId) => {
     if (!window.confirm('Are you sure you want to delete this group? All expenses and members will be lost!')) {
       return;
     }
 
-    const updatedGroups = groups.filter(group => group.id !== groupId);
-    setGroups(updatedGroups);
-    
-    if (selectedGroup && selectedGroup.id === groupId) {
-      setSelectedGroup(null);
-    }
+    try {
+      await deleteDoc(doc(db, 'groups', groupId));
+      
+      if (selectedGroup && selectedGroup.id === groupId) {
+        setSelectedGroup(null);
+      }
 
-    alert('Group deleted successfully!');
+      await loadGroups();
+      alert('Group deleted successfully!');
+    } catch (error) {
+      console.error("Error deleting group:", error);
+      alert("Error deleting group. Please try again.");
+    }
   };
 
   // Open add expense modal
@@ -349,6 +399,24 @@ function App() {
     const total = getTotalExpenses();
     return selectedGroup.members.length > 0 ? total / selectedGroup.members.length : 0;
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="App">
+        <header className="app-header">
+          <h1>💰 SmartSplit</h1>
+          <p>Split expenses smartly with friends</p>
+        </header>
+        <div className="container">
+          <div className="loading-state">
+            <h2>Loading your groups...</h2>
+            <p>Please wait</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // If showing settlement view
   if (selectedGroup && showSettlement) {

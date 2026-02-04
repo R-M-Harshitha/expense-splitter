@@ -1117,3 +1117,22 @@ body {
     font-size: 1.8rem;
   }
 }
+/* Loading State */
+.loading-state {
+  text-align: center;
+  padding: 5rem 2rem;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(6, 182, 212, 0.1);
+}
+
+.loading-state h2 {
+  color: #0e7490;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.loading-state p {
+  color: #64748b;
+  font-size: 1.2rem;
+}
