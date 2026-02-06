@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/expense-splitter/static/css/main.ce5765e6.css",
+    "main.js": "/expense-splitter/static/js/main.64fc535f.js",
+    "static/js/453.20359781.chunk.js": "/expense-splitter/static/js/453.20359781.chunk.js",
+    "index.html": "/expense-splitter/index.html",
+    "main.ce5765e6.css.map": "/expense-splitter/static/css/main.ce5765e6.css.map",
+    "main.64fc535f.js.map": "/expense-splitter/static/js/main.64fc535f.js.map",
+    "453.20359781.chunk.js.map": "/expense-splitter/static/js/453.20359781.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.ce5765e6.css",
+    "static/js/main.64fc535f.js"
+  ]
+}
